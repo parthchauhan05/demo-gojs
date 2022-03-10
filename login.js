@@ -1,7 +1,7 @@
 function validate() {
-    let password = document.getElementById("password").value;
+    let password = document.getElementById("_password").value;
     if (password == "gojsdemo") {
-        window.location.replace("home.html");
+        window.location.href = "home.html";
         localStorage.setItem("authenticated", new Date().getTime() + 300000);
     }
 }
