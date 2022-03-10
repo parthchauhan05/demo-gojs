@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <title>Family Tree</title>
+    <style>
+        /* CSS */
+        
+        button {
+            background: #5E5DF0;
+            border-radius: 999px;
+            box-shadow: #5E5DF0 0 10px 20px -10px;
+            color: #FFFFFF;
+            cursor: pointer;
+            font-family: Calibri, 'Trebuchet MS', sans-serif;
+            font-size: 16px;
+            line-height: 24px;
+            padding: 8px 18px;
+            border: none;
+            touch-action: manipulation;
+            width: fit-content;
+            word-break: break-word;
+        }
+        
+        .home {
+            box-shadow: 0px 10px 50px 10px rgba(0, 0, 0, 0.1);
+            width: 500px;
+            height: 100px;
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            margin: 20vw auto;
+        }
+    </style>
+    <script src="./login.js"></script>
+
+</head>
+
+<body onload="checkLogin()">
+    <script src="https://unpkg.com/gojs@2.2.5/release/go.js"></script>
+    <div id="allSampleContent" class="p-4 w-full">
+        <link href="https://fonts.googleapis.com/css?family=Droid+Serif:400,700" rel="stylesheet" type="text/css">
+        <script id="code">
+            function init() {
+
+                // Since 2.2 you can also author concise templates with method chaining instead of GraphObject.make
+                // For details, see https://gojs.net/latest/intro/buildingObjects.html
+                const $ = go.GraphObject.make; // for conciseness in defining templates
+
+                myDiagram =
+                    $(go.Diagram, "myDiagramDiv", // must be the ID or reference to div
+                        {
+                            "toolManager.hoverDelay": 100, // 100 milliseconds instead of the default 850
+                            allowCopy: false,
+                            layout: // create a TreeLayout for the family tree
+                                $(go.TreeLayout, {
+                                angle: 90,
+                                nodeSpacing: 10,
+                                layerSpacing: 40,
+                                layerStyle: go.TreeLayout.LayerUniform
+                            })
+                        });
+
+                // get tooltip text from the object's data
+                function tooltipTextConverter(person) {
+                    var str = "";
+                    str += "Born: " + person.birthYear;
+                    if (person.deathYear !== undefined) str += "\nDied: " + person.deathYear;
+                    if (person.reign !== undefined) str += "\nReign: " + person.reign;
+                    return str;
+                }
+
+                // define tooltips for nodes
+                var tooltiptemplate =
+                    $("ToolTip", {
+                            "Border.fill": "whitesmoke",
+                            "Border.stroke": "black"
+                        },
+                        $(go.TextBlock, {
+                                font: "bold 8pt Helvetica, bold Arial, sans-serif",
+                                wrap: go.TextBlock.WrapFit,
+                                margin: 5
+                            },
+                            new go.Binding("text", "", tooltipTextConverter))
+                    );
+
+
+                // replace the default Node template in the nodeTemplateMap
+                myDiagram.nodeTemplate =
+                    $(go.Node, "Auto", {
+                            deletable: false,
+                            toolTip: tooltiptemplate
+                        },
+                        new go.Binding("text", "name"),
+                        $(go.Shape, "Rectangle", {
+                            fill: null,
+                            stroke: "black",
+                            strokeWidth: 1,
+                            stretch: go.GraphObject.Fill,
+                            alignment: go.Spot.Center
+                        }),
+                        $(go.Panel, "Horizontal",
+                            $(go.Picture, {
+                                    margin: 2,
+                                    width: 60,
+                                    height: 60
+                                },
+                                new go.Binding("source")),
+                            $(go.TextBlock, {
+                                    font: "700 12px Droid Serif, sans-serif",
+                                    textAlign: "center",
+                                    margin: 10,
+                                    maxSize: new go.Size(100, NaN)
+                                },
+                                new go.Binding("text", "name")),
+                        )
+
+                    );
+
+                // define the Link template
+                myDiagram.linkTemplate =
+                    $(go.Link, // the whole link panel
+                        {
+                            routing: go.Link.Orthogonal,
+                            corner: 5,
+                            selectable: false
+                        },
+                        $(go.Shape, {
+                            strokeWidth: 3,
+                            stroke: '#424242'
+                        })); // the gray link shape
+
+                // here's the family data
+                var nodeDataArray = [{
+                    key: 0,
+                    name: "George V",
+                    gender: "M",
+                    birthYear: "1865",
+                    deathYear: "1936",
+                    reign: "1910-1936",
+                    source: "photo.png"
+                }, {
+                    key: 1,
+                    parent: 0,
+                    name: "Edward VIII",
+                    gender: "M",
+                    birthYear: "1894",
+                    deathYear: "1972",
+                    reign: "1936",
+                    source: "photo.png"
+                }, {
+                    key: 2,
+                    parent: 0,
+                    name: "George VI",
+                    gender: "M",
+                    birthYear: "1895",
+                    deathYear: "1952",
+                    reign: "1936-1952",
+                    source: "photo.png"
+                }, {
+                    key: 7,
+                    parent: 2,
+                    name: "Elizabeth II",
+                    gender: "F",
+                    birthYear: "1926",
+                    reign: "1952-",
+                    source: "photo.png"
+                }, {
+                    key: 16,
+                    parent: 7,
+                    name: "Charles, Prince of Wales",
+                    gender: "M",
+                    birthYear: "1948",
+                    source: "photo.png"
+                }];
+
+                // create the model for the family tree
+                myDiagram.model = new go.TreeModel(nodeDataArray);
+
+                document.getElementById('zoomToFit').addEventListener('click', () => myDiagram.commandHandler.zoomToFit());
+
+                document.getElementById('centerRoot').addEventListener('click', () => {
+                    myDiagram.scale = 1;
+                    myDiagram.scrollToRect(myDiagram.findNodeForKey(0).actualBounds);
+                });
+
+            }
+            window.addEventListener('DOMContentLoaded', init);
+        </script>
+
+        <div id="sample">
+            <div id="myDiagramDiv" class="home" style="margin: 1vw auto; margin-bottom: 2.5vw;background-color: white; width: 90vw; height: 550px; position: relative; -webkit-tap-highlight-color: rgba(255, 255, 255, 0);">
+                <canvas tabindex="0" width="1054" height="531" style="position: absolute; top: 0px; left: 0px; z-index: 2; user-select: none; touch-action: none; width: 1054px; height: 531px;">
+                This text is displayed if your browser does not support the Canvas HTML element.</canvas>
+                <div style="position: absolute; overflow: auto; width: 1054px; height: 548px; z-index: 1;">
+                    <div style="position: absolute; width: 4113.22px; height: 1px;"></div>
+                </div>
+            </div>
+            <div style="width: 99vw; display: flex; gap: 1vw; justify-content: center;">
+                <button id="zoomToFit">Zoom To Fit</button>
+                <button id="centerRoot">Center on Root</button>
+                <a href="./home.html" style="text-decoration: none; color: whitesmoke;">
+                    <button>Home</button>
+                </a>
+                <a href="./incremental.html" style="text-decoration: none; color: whitesmoke;">
+                    <button>Incremental Tree</button>
+                </a>
+            </div>
+
+        </div>
+</body>
+
+</html>
