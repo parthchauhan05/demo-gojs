@@ -10,11 +10,11 @@
     <div class="container">
         <div class="main">
             <h2>Enter Password For Access</h2>
-            <form method="get" name="parth-form">
+            <div>
                 <label>Password :</label>
                 <input type="password" name="password" id="_password" />
-                <input type="button" value="Login" id="submit" onclick="validate()" />
-            </form>
+                <input type="button" value="Login" id="submit" onclick="validate(document.getElementById('_password').value)" />
+            </div>
         </div>
     </div>
 </body>
